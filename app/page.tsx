@@ -232,7 +232,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans text-gray-900 flex justify-center items-center">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl overflow-hidden p-6">
+      {/* REVISI: Class overflow-hidden dibuang dari sini biar dropdown gak kepotong */}
+      <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl p-6 relative">
         
         {/* HEADER & LOGO */}
         <div className="flex flex-col items-center justify-center gap-2 mb-8">
@@ -253,7 +254,7 @@ export default function Home() {
           
           <div className="relative">
             <div className="relative">
-              <input type="text" placeholder="Merek Mobil"
+              <input type="text" placeholder="Brand"
                 className="w-full border border-gray-300 rounded-xl p-3 bg-white text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-bold placeholder:text-xs placeholder:uppercase placeholder:tracking-wider outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 value={searchMake1}
                 onChange={(e) => {setSearchMake1(e.target.value); setSelectedMake(""); setIsMakeOpen1(true);}}
@@ -272,7 +273,7 @@ export default function Home() {
 
           <div className="relative">
             <div className="relative">
-              <input type="text" placeholder="Model Mobil"
+              <input type="text" placeholder="Tipe"
                 className="w-full border border-gray-300 rounded-xl p-3 bg-white text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-bold placeholder:text-xs placeholder:uppercase placeholder:tracking-wider disabled:opacity-50 disabled:bg-gray-100 outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 value={searchType1}
                 onChange={(e) => {setSearchType1(e.target.value); setSelectedType(""); setIsTypeOpen1(true);}}
@@ -348,7 +349,7 @@ export default function Home() {
             <div className={`space-y-4 ${viewMode === "compareResult" ? "hidden" : ""}`}>
               <div className="relative">
                 <div className="relative">
-                  <input type="text" placeholder="Merek Lawan"
+                  <input type="text" placeholder="Brand"
                     className="w-full border border-gray-300 rounded-xl p-3 bg-white text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-bold placeholder:text-xs placeholder:uppercase placeholder:tracking-wider outline-none focus:ring-2 focus:ring-green-500 pr-10"
                     value={searchMake2}
                     onChange={(e) => {setSearchMake2(e.target.value); setSelectedMake2(""); setIsMakeOpen2(true);}}
@@ -367,7 +368,7 @@ export default function Home() {
 
               <div className="relative">
                 <div className="relative">
-                  <input type="text" placeholder="Model Lawan"
+                  <input type="text" placeholder="Tipe"
                     className="w-full border border-gray-300 rounded-xl p-3 bg-white text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-bold placeholder:text-xs placeholder:uppercase placeholder:tracking-wider disabled:opacity-50 disabled:bg-gray-100 outline-none focus:ring-2 focus:ring-green-500 pr-10"
                     value={searchType2}
                     onChange={(e) => {setSearchType2(e.target.value); setSelectedType2(""); setIsTypeOpen2(true);}}
