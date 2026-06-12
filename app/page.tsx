@@ -11,10 +11,12 @@ import CarSelector from "./components/CarSelector";
 import SingleResult from "./components/SingleResult";
 import CompareResult from "./components/CompareResult";
 import AboutModal from "./components/AboutModal"; // Import modal baru
+import FeedbackModal from "./components/FeedbackModal";
 
 export default function Home() {
   const [rawCars, setRawCars] = useState<any[]>([]);
   const [katalogHarga, setKatalogHarga] = useState<any[]>([]);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // State Mobil 1
   const [makes, setMakes] = useState<string[]>([]);
@@ -192,16 +194,18 @@ export default function Home() {
         )}
       </div>
 
-      {/* FOOTER LINK ABOUT */}
-      <button 
-        onClick={() => setIsAboutOpen(true)} 
-        className="mt-6 text-xs text-gray-400 hover:text-gray-600 transition font-medium tracking-wide"
-      >
-        © 2026 BBM Tracker • Tentang & Disclaimer
-      </button>
+      {/* FOOTER LINK ABOUT & FEEDBACK */}
+      <div className="mt-6 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-400 font-medium tracking-wide">
+        <span>© 2026 BBM Tracker</span>
+        <span>•</span>
+        <button onClick={() => setIsAboutOpen(true)} className="hover:text-gray-600 transition">Tentang & Disclaimer</button>
+        <span>•</span>
+        <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-green-600 font-bold transition">Kritik & Saran</button>
+      </div>
 
-      {/* RENDER MODAL TENTANG & DISCLAIMER */}
+      {/* RENDER MODAL TENTANG & FEEDBACK */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </main>
   );
 }
