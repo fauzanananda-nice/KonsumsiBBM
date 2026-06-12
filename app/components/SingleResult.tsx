@@ -7,7 +7,7 @@ import pertaminaLogo from "../pertamina.png";
 import shellLogo from "../shell.png";
 import bpLogo from "../bp.png";
 import vivoLogo from "../vivo.png";
-import mainLogo from "../logo.png"; // Import logo utama buat watermark
+import mainLogo from "../logo.png"; 
 
 const spbuMap = [
   { id: 1, name: 'Pertamina', logo: pertaminaLogo },
@@ -17,19 +17,19 @@ const spbuMap = [
 ];
 const ronMap = [{ id: 1, val: 90 }, { id: 2, val: 92 }, { id: 3, val: 95 }, { id: 4, val: 98 }];
 
-// Komponen helper buat narik logo brand mobil
-const BrandLogo = ({ make }: { make: string }) => {
+const BrandLogo = ({ make, className }: { make: string, className?: string }) => {
   const [hasError, setHasError] = useState(false);
   const safeMake = make ? make.toLowerCase().replace(/\s+/g, '-') : '';
 
-  if (hasError || !safeMake) return <Car className="w-5 h-5 text-gray-400" />;
+  if (hasError || !safeMake) return <Car className={`text-gray-400 ${className || 'w-5 h-5'}`} />;
 
   return (
     <img
       src={`/logos/${safeMake}.png`}
       alt={make}
-      className="w-full h-full object-contain"
+      className={`object-contain ${className || 'w-full h-full'}`}
       onError={() => setHasError(true)}
+      crossOrigin="anonymous" 
     />
   );
 };
@@ -50,13 +50,14 @@ export default function SingleResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      // Nyalain mesin fotokopi dengan bg putih
-      const blob = await toBlob(captureRef.current, { backgroundColor: '#ffffff' });
+      const blob = await toBlob(captureRef.current, { 
+        cacheBust: true, 
+        pixelRatio: 2 
+      });
       if (!blob) throw new Error('Gagal bikin gambar');
 
       const file = new File([blob], 'bbm-tracker-single.png', { type: 'image/png' });
 
-      // Cek apakah HP/Browser support fitur Share bawaan
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'Hasil Cek Konsumsi BBM',
@@ -64,7 +65,6 @@ export default function SingleResult({
           files: [file],
         });
       } else {
-        // Fallback kalo dibuka di Laptop (Otomatis Download)
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = 'bbm-tracker-single.png';
@@ -84,10 +84,8 @@ export default function SingleResult({
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* KOTAK TARGET SCREENSHOT (Semua yang ada di dalem div ini bakal difoto) */}
-      <div ref={captureRef} className="bg-white pb-4">
-        
-        {/* REVISI DESAIN: Card Ringkasan Mobil + Logo Brand */}
+      {/* UI UTAMA (TETAP SAMA) */}
+      <div className="bg-white pb-4">
         <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 shrink-0">
             <BrandLogo make={selectedCarData.Make} />
@@ -163,23 +161,74 @@ export default function SingleResult({
             </p>
           </div>
         </div>
-        
-        {/* WATERMARK Bawah Pas Di-Share */}
-        <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2">
-          <Image src={mainLogo} alt="BBM Tracker" className="h-4 w-auto grayscale opacity-50" />
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">BBM-Tracker.vercel.app</span>
-        </div>
-
       </div>
 
-      {/* Tombol Share (Diluar kotak capture, jadi gak ikut kefoto) */}
-      <button 
-        onClick={handleShare} 
-        disabled={isSharing}
-        className="w-full mt-4 bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2"
-      >
+      <button onClick={handleShare} disabled={isSharing}
+        className="w-full mt-4 bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2">
         {isSharing ? "Memproses Gambar..." : <><Share2 className="w-5 h-5"/> Pamerin Hasilnya!</>}
       </button>
+
+
+      {/* ========================================== */}
+      {/* STUDIO GAIB KHUSUS SCREENSHOT (9:16)       */}
+      {/* ========================================== */}
+      <div className="fixed left-[-9999px] top-0 pointer-events-none">
+        <div ref={captureRef} className="w-[405px] h-[720px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center p-6 relative font-sans">
+          
+          <h2 className="text-2xl font-black text-green-600 tracking-widest uppercase mb-6 flex items-center gap-2 relative z-20">
+            <Map className="w-6 h-6"/> Hasil Kalkulasi
+          </h2>
+
+          <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden shadow-sm">
+            
+            {/* BACKGROUND FADING LOGO KAYA DI COMPARE */}
+            <div className="absolute -right-8 -top-8 opacity-[0.06] w-64 h-64 pointer-events-none">
+               <BrandLogo make={selectedCarData.Make} />
+            </div>
+
+            {/* HEADER MOBIL YANG DI-MAXIMIZE */}
+            <div className="relative z-10">
+               <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">{selectedCarData.Make} {selectedCarData.Year}</p>
+               {/* Ini yang bikin teksnya bisa wrapping rapi ke bawah mengisi space kosong */}
+               <p className="text-3xl font-black text-gray-900 leading-tight pr-6">{selectedCarData.Type}</p>
+               <p className="text-xs font-medium text-gray-500 mt-2">{selectedCarData.Transmission} • {selectedCarData['Engine Displacement']} cc</p>
+            </div>
+            
+            {/* GRID DALKOT & LUKOT */}
+            <div className="grid grid-cols-2 gap-4 relative z-10">
+               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Dalam Kota</p>
+                  <p className="text-3xl font-black text-gray-900">{selectedCarData['City Fuel Consumption (km/l)']}</p>
+               </div>
+               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Luar Kota</p>
+                  <p className="text-3xl font-black text-gray-900">{selectedCarData['Highway Fuel Consumption (km/l)']}</p>
+               </div>
+            </div>
+
+            {/* BOX BIAYA */}
+            <div className="bg-green-50 rounded-2xl p-5 border border-green-200 text-center relative z-10">
+               <p className="text-[10px] font-bold text-green-700 uppercase mb-2 tracking-widest">Estimasi Biaya ({dailyDistance}km/hari)</p>
+               <div className="flex items-center justify-center gap-2 mb-2">
+                  <img src={spbuMap.find(s => s.id === userBensin.spbu)?.logo.src} crossOrigin="anonymous" className="h-5 object-contain" />
+                  <span className="text-sm font-black text-green-800">{ronMap.find(r => r.id === userBensin.ron)?.val}</span>
+               </div>
+               <p className="text-4xl font-black text-green-700 my-3">
+                 Rp {Math.round((dailyDistance / parseFloat(selectedCarData['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin.spbu, userBensin.ron) * 30).toLocaleString('id-ID')}
+               </p>
+               <p className="text-[10px] text-green-600/70 font-bold uppercase tracking-widest">Total per 30 Hari</p>
+            </div>
+
+          </div>
+
+          {/* Watermark Margin */}
+          <div className="absolute bottom-8 flex items-center justify-center gap-2 opacity-50 relative z-20 mt-6">
+            <img src={mainLogo.src} crossOrigin="anonymous" className="h-4 grayscale" />
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">bbm-tracker.vercel.app</span>
+          </div>
+
+        </div>
+      </div>
 
     </div>
   );

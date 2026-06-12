@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Fuel, Map, Share2, Car } from "lucide-react";
+import { Fuel, Map, Share2, Car, Swords } from "lucide-react";
 import { toBlob } from "html-to-image";
 
 import pertaminaLogo from "../pertamina.png";
 import shellLogo from "../shell.png";
 import bpLogo from "../bp.png";
 import vivoLogo from "../vivo.png";
-import mainLogo from "../logo.png"; // Import logo utama buat watermark
+import mainLogo from "../logo.png"; 
 
 const spbuMap = [
   { id: 1, name: 'Pertamina', logo: pertaminaLogo },
@@ -17,19 +17,19 @@ const spbuMap = [
 ];
 const ronMap = [{ id: 1, val: 90 }, { id: 2, val: 92 }, { id: 3, val: 95 }, { id: 4, val: 98 }];
 
-// Komponen helper buat narik logo brand mobil
-const BrandLogo = ({ make }: { make: string }) => {
+const BrandLogo = ({ make, className }: { make: string, className?: string }) => {
   const [hasError, setHasError] = useState(false);
   const safeMake = make ? make.toLowerCase().replace(/\s+/g, '-') : '';
 
-  if (hasError || !safeMake) return <Car className="w-5 h-5 text-gray-400" />;
+  if (hasError || !safeMake) return <Car className={`text-gray-400 ${className || 'w-5 h-5'}`} />;
 
   return (
     <img
       src={`/logos/${safeMake}.png`}
       alt={make}
-      className="w-full h-full object-contain"
+      className={`object-contain ${className || 'w-full h-full'}`}
       onError={() => setHasError(true)}
+      crossOrigin="anonymous"
     />
   );
 };
@@ -50,7 +50,10 @@ export default function CompareResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      const blob = await toBlob(captureRef.current, { backgroundColor: '#ffffff' });
+      const blob = await toBlob(captureRef.current, { 
+        cacheBust: true,
+        pixelRatio: 2
+      });
       if (!blob) throw new Error('Gagal bikin gambar');
 
       const file = new File([blob], 'bbm-tracker-vs.png', { type: 'image/png' });
@@ -81,10 +84,8 @@ export default function CompareResult({
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* KOTAK TARGET SCREENSHOT (Semua yang ada di dalem div ini bakal difoto) */}
-      <div ref={captureRef} className="bg-white pb-4 pt-2">
-        
-        {/* UPDATE: Card Ringkasan Mobil 1 & 2 ditambah Logo Brand */}
+      {/* UI UTAMA (TETAP SAMA) */}
+      <div className="bg-white pb-4 pt-2">
         <div className="grid grid-cols-2 gap-2 mb-4 text-center">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
             <div className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 mb-2 shrink-0">
@@ -228,23 +229,115 @@ export default function CompareResult({
             </div>
           </div>
         </div>
-        
-        {/* WATERMARK Bawah Pas Di-Share */}
-        <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2">
-          <Image src={mainLogo} alt="BBM Tracker" className="h-4 w-auto grayscale opacity-50" />
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">BBM-Tracker.vercel.app</span>
-        </div>
-
       </div>
 
-      {/* Tombol Share (Diluar kotak capture, jadi gak ikut kefoto) */}
-      <button 
-        onClick={handleShare} 
-        disabled={isSharing}
-        className="w-full mt-4 bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2"
-      >
+      <button onClick={handleShare} disabled={isSharing}
+        className="w-full mt-4 bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2">
         {isSharing ? "Memproses Gambar..." : <><Share2 className="w-5 h-5"/> Pamerin Hasilnya!</>}
       </button>
+
+
+      {/* ========================================== */}
+      {/* STUDIO GAIB KHUSUS SCREENSHOT (9:16)       */}
+      {/* ========================================== */}
+      <div className="fixed left-[-9999px] top-0 pointer-events-none">
+        <div ref={captureRef} className="w-[405px] h-[720px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center p-6 relative font-sans">
+          
+          <h2 className="text-2xl font-black text-green-600 uppercase tracking-widest mb-4 flex items-center gap-2 relative z-20">
+            <Swords className="w-6 h-6"/> Adu Mekanik
+          </h2>
+
+          <div className="bg-white w-full rounded-3xl border border-gray-200 p-5 flex flex-col gap-4 relative z-10 shadow-sm">
+            
+            {/* Mobil 1 */}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
+               {/* FADING LOGO */}
+               <div className="absolute -right-4 -top-4 opacity-[0.06] w-28 h-28 pointer-events-none">
+                  <BrandLogo make={selectedCarData1.Make} />
+               </div>
+
+               <div className="relative z-10 flex flex-col gap-1">
+                 <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{selectedCarData1.Make} {selectedCarData1.Year}</p>
+                 {/* Hapus Truncate, biarin wrapping 2 baris rapi */}
+                 <p className="text-lg font-black text-gray-900 leading-tight w-full pr-4">{selectedCarData1.Type}</p>
+                 <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData1.Transmission} • {selectedCarData1['Engine Displacement']} cc</p>
+               </div>
+
+               {/* REVISI: GRID DALKOT & LUKOT BERDAMPINGAN */}
+               <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
+                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Dalkot</p>
+                    <p className="text-sm font-black text-gray-900">{selectedCarData1['City Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 </div>
+                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Luar Kota</p>
+                    <p className="text-sm font-black text-gray-900">{selectedCarData1['Highway Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 </div>
+               </div>
+
+               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5">
+                 <div className="flex items-center gap-1.5">
+                   <img src={spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                   <span className="text-xs font-black text-gray-700">{ronMap.find(r => r.id === userBensin1.ron)?.val}</span>
+                 </div>
+                 <div className="text-right">
+                   <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">30 Hari ({dailyDistance}km/h)</p>
+                   <p className="text-base font-black text-green-600">Rp {Math.round((dailyDistance / parseFloat(selectedCarData1['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin1.spbu, userBensin1.ron) * 30).toLocaleString('id-ID')}</p>
+                 </div>
+               </div>
+            </div>
+
+            <div className="flex items-center justify-center -my-5 relative z-20">
+               <span className="bg-gray-900 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full border-[3px] border-white shadow-sm">VS</span>
+            </div>
+
+            {/* Mobil 2 */}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
+               {/* FADING LOGO */}
+               <div className="absolute -right-4 -top-4 opacity-[0.06] w-28 h-28 pointer-events-none">
+                  <BrandLogo make={selectedCarData2.Make} />
+               </div>
+
+               <div className="relative z-10 flex flex-col gap-1">
+                 <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{selectedCarData2.Make} {selectedCarData2.Year}</p>
+                 {/* Hapus Truncate, biarin wrapping 2 baris rapi */}
+                 <p className="text-lg font-black text-gray-900 leading-tight w-full pr-4">{selectedCarData2.Type}</p>
+                 <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData2.Transmission} • {selectedCarData2['Engine Displacement']} cc</p>
+               </div>
+
+               {/* REVISI: GRID DALKOT & LUKOT BERDAMPINGAN */}
+               <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
+                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Dalkot</p>
+                    <p className="text-sm font-black text-gray-900">{selectedCarData2['City Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 </div>
+                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Luar Kota</p>
+                    <p className="text-sm font-black text-gray-900">{selectedCarData2['Highway Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 </div>
+               </div>
+
+               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5">
+                 <div className="flex items-center gap-1.5">
+                   <img src={spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                   <span className="text-xs font-black text-gray-700">{ronMap.find(r => r.id === userBensin2.ron)?.val}</span>
+                 </div>
+                 <div className="text-right">
+                   <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">30 Hari ({dailyDistance}km/h)</p>
+                   <p className="text-base font-black text-green-600">Rp {Math.round((dailyDistance / parseFloat(selectedCarData2['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin2.spbu, userBensin2.ron) * 30).toLocaleString('id-ID')}</p>
+                 </div>
+               </div>
+            </div>
+
+          </div>
+
+          <div className="absolute bottom-8 flex items-center justify-center gap-2 opacity-50 relative z-20 mt-5">
+            <img src={mainLogo.src} crossOrigin="anonymous" className="h-4 grayscale" />
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">bbm-tracker.vercel.app</span>
+          </div>
+
+        </div>
+      </div>
 
     </div>
   );
