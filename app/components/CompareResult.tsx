@@ -56,18 +56,18 @@ export default function CompareResult({
       });
       if (!blob) throw new Error('Gagal bikin gambar');
 
-      const file = new File([blob], 'bbm-tracker-vs.png', { type: 'image/png' });
+      const file = new File([blob], 'exum-tracker-vs.png', { type: 'image/png' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'Adu Mekanik Konsumsi BBM',
-          text: `Adu mekanik dalkot ${selectedCarData1.Type} vs ${selectedCarData2.Type}. Mana yang lebih irit? Cek di BBM Tracker!`,
+          text: `Adu mekanik dalkot ${selectedCarData1.Type} vs ${selectedCarData2.Type}. Mana yang lebih irit? Cek di EXUM Calculator!`,
           files: [file],
         });
       } else {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'bbm-tracker-vs.png';
+        link.download = 'exum-tracker-vs.png';
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
@@ -81,10 +81,19 @@ export default function CompareResult({
     }
   };
 
+  // Helper Variables for Winners (Irit/Boros)
+  const dalkot1 = parseFloat(selectedCarData1['City Fuel Consumption (km/l)']);
+  const dalkot2 = parseFloat(selectedCarData2['City Fuel Consumption (km/l)']);
+  const lukot1 = parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']);
+  const lukot2 = parseFloat(selectedCarData2['Highway Fuel Consumption (km/l)']);
+  
+  const cost1 = Math.round((dailyDistance / dalkot1) * getHargaUserBensin(userBensin1.spbu, userBensin1.ron) * 30);
+  const cost2 = Math.round((dailyDistance / dalkot2) * getHargaUserBensin(userBensin2.spbu, userBensin2.ron) * 30);
+
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA (TETAP SAMA) */}
+      {/* UI UTAMA (TETAP SAMA, GAK DISENTUH SCREENSHOT) */}
       <div className="bg-white pb-4 pt-2">
         <div className="grid grid-cols-2 gap-2 mb-4 text-center">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
@@ -107,42 +116,21 @@ export default function CompareResult({
 
         <p className="text-center text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest mt-6">Dalam Kota (km/l)</p>
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className={`p-4 rounded-xl text-center border ${parseFloat(selectedCarData1['City Fuel Consumption (km/l)']) > parseFloat(selectedCarData2['City Fuel Consumption (km/l)']) ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${parseFloat(selectedCarData1['City Fuel Consumption (km/l)']) > parseFloat(selectedCarData2['City Fuel Consumption (km/l)']) ? 'text-green-600' : 'text-red-600'}`}>
-              {selectedCarData1['City Fuel Consumption (km/l)']}
-            </p>
+          <div className={`p-4 rounded-xl text-center border ${dalkot1 > dalkot2 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
+            <p className={`text-2xl font-black ${dalkot1 > dalkot2 ? 'text-green-600' : 'text-red-600'}`}>{dalkot1}</p>
           </div>
-          <div className={`p-4 rounded-xl text-center border ${parseFloat(selectedCarData2['City Fuel Consumption (km/l)']) > parseFloat(selectedCarData1['City Fuel Consumption (km/l)']) ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${parseFloat(selectedCarData2['City Fuel Consumption (km/l)']) > parseFloat(selectedCarData1['City Fuel Consumption (km/l)']) ? 'text-green-600' : 'text-red-600'}`}>
-              {selectedCarData2['City Fuel Consumption (km/l)']}
-            </p>
+          <div className={`p-4 rounded-xl text-center border ${dalkot2 > dalkot1 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
+            <p className={`text-2xl font-black ${dalkot2 > dalkot1 ? 'text-green-600' : 'text-red-600'}`}>{dalkot2}</p>
           </div>
         </div>
 
         <p className="text-center text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest mt-6">Luar Kota (km/l)</p>
         <div className="grid grid-cols-2 gap-2 mb-6">
-          <div className={`p-4 rounded-xl text-center border ${parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']) > parseFloat(selectedCarData2['Highway Fuel Consumption (km/l)']) ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']) > parseFloat(selectedCarData2['Highway Fuel Consumption (km/l)']) ? 'text-green-600' : 'text-red-600'}`}>
-              {selectedCarData1['Highway Fuel Consumption (km/l)']}
-            </p>
+          <div className={`p-4 rounded-xl text-center border ${lukot1 > lukot2 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
+            <p className={`text-2xl font-black ${lukot1 > lukot2 ? 'text-green-600' : 'text-red-600'}`}>{lukot1}</p>
           </div>
-          <div className={`p-4 rounded-xl text-center border ${parseFloat(selectedCarData2['Highway Fuel Consumption (km/l)']) > parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']) ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${parseFloat(selectedCarData2['Highway Fuel Consumption (km/l)']) > parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']) ? 'text-green-600' : 'text-red-600'}`}>
-              {selectedCarData2['Highway Fuel Consumption (km/l)']}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-2 justify-center mb-6">
-          <div className="flex-1 flex flex-col items-center justify-center gap-1 bg-green-50 border border-green-200 text-green-700 py-3 rounded-xl">
-            <Fuel className="w-5 h-5 mb-1" />
-            <span className="text-[10px] uppercase font-bold text-green-600/70">Min. BBM M1</span>
-            <span className="font-black text-sm">{selectedCarData1['Gas Type']}</span>
-          </div>
-          <div className="flex-1 flex flex-col items-center justify-center gap-1 bg-green-50 border border-green-200 text-green-700 py-3 rounded-xl">
-            <Fuel className="w-5 h-5 mb-1" />
-            <span className="text-[10px] uppercase font-bold text-green-600/70">Min. BBM M2</span>
-            <span className="font-black text-sm">{selectedCarData2['Gas Type']}</span>
+          <div className={`p-4 rounded-xl text-center border ${lukot2 > lukot1 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
+            <p className={`text-2xl font-black ${lukot2 > lukot1 ? 'text-green-600' : 'text-red-600'}`}>{lukot2}</p>
           </div>
         </div>
 
@@ -159,7 +147,6 @@ export default function CompareResult({
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
-            {/* Radio M1 */}
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">BBM M1</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -186,7 +173,6 @@ export default function CompareResult({
               <p className="text-[10px] font-bold text-gray-400 text-center">Rp {getHargaUserBensin(userBensin1.spbu, userBensin1.ron).toLocaleString('id-ID')}/L</p>
             </div>
 
-            {/* Radio M2 */}
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">BBM M2</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -218,13 +204,13 @@ export default function CompareResult({
             <div className="text-center flex flex-col justify-center">
               <p className="text-[10px] text-gray-500 font-bold uppercase mb-1 truncate">{selectedCarData1.Type}</p>
               <p className="text-base md:text-md font-black text-gray-900 break-words">
-                Rp {Math.round((dailyDistance / parseFloat(selectedCarData1['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin1.spbu, userBensin1.ron) * 30).toLocaleString('id-ID')}
+                Rp {cost1.toLocaleString('id-ID')}
               </p>
             </div>
             <div className="text-center flex flex-col justify-center">
               <p className="text-[10px] text-gray-500 font-bold uppercase mb-1 truncate">{selectedCarData2.Type}</p>
               <p className="text-base md:text-md font-black text-gray-900 break-words">
-                Rp {Math.round((dailyDistance / parseFloat(selectedCarData2['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin2.spbu, userBensin2.ron) * 30).toLocaleString('id-ID')}
+                Rp {cost2.toLocaleString('id-ID')}
               </p>
             </div>
           </div>
@@ -251,38 +237,40 @@ export default function CompareResult({
             
             {/* Mobil 1 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO */}
-               <div className="absolute -right-4 -top-4 opacity-[0.06] w-28 h-28 pointer-events-none">
+               {/* FADING LOGO (OPACITY 0.15) */}
+               <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
                   <BrandLogo make={selectedCarData1.Make} />
                </div>
 
                <div className="relative z-10 flex flex-col gap-1">
                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{selectedCarData1.Make} {selectedCarData1.Year}</p>
-                 {/* Hapus Truncate, biarin wrapping 2 baris rapi */}
                  <p className="text-lg font-black text-gray-900 leading-tight w-full pr-4">{selectedCarData1.Type}</p>
                  <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData1.Transmission} • {selectedCarData1['Engine Displacement']} cc</p>
                </div>
 
-               {/* REVISI: GRID DALKOT & LUKOT BERDAMPINGAN */}
+               {/* GRID DALKOT & LUKOT */}
                <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
-                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Dalkot</p>
-                    <p className="text-sm font-black text-gray-900">{selectedCarData1['City Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 <div className={`rounded-lg p-2 text-center border shadow-sm ${dalkot1 > dalkot2 ? 'bg-green-50 border-green-200' : dalkot1 < dalkot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                    <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${dalkot1 > dalkot2 ? 'text-green-700' : dalkot1 < dalkot2 ? 'text-red-700' : 'text-gray-500'}`}>Dalkot</p>
+                    <p className={`text-sm font-black ${dalkot1 > dalkot2 ? 'text-green-700' : dalkot1 < dalkot2 ? 'text-red-700' : 'text-gray-900'}`}>{dalkot1} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
-                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Luar Kota</p>
-                    <p className="text-sm font-black text-gray-900">{selectedCarData1['Highway Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 <div className={`rounded-lg p-2 text-center border shadow-sm ${lukot1 > lukot2 ? 'bg-green-50 border-green-200' : lukot1 < lukot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                    <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${lukot1 > lukot2 ? 'text-green-700' : lukot1 < lukot2 ? 'text-red-700' : 'text-gray-500'}`}>Luar Kota</p>
+                    <p className={`text-sm font-black ${lukot1 > lukot2 ? 'text-green-700' : lukot1 < lukot2 ? 'text-red-700' : 'text-gray-900'}`}>{lukot1} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
                </div>
 
-               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5">
-                 <div className="flex items-center gap-1.5">
-                   <img src={spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
-                   <span className="text-xs font-black text-gray-700">{ronMap.find(r => r.id === userBensin1.ron)?.val}</span>
+               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5 mt-1">
+                 <div>
+                   <div className="flex items-center gap-1.5 mb-1">
+                     <img src={spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                     <span className="text-xs font-black text-gray-700">RON {ronMap.find(r => r.id === userBensin1.ron)?.val}</span>
+                   </div>
+                   <p className="text-[9px] text-gray-500 font-bold">Rp {getHargaUserBensin(userBensin1.spbu, userBensin1.ron).toLocaleString('id-ID')}/L</p>
                  </div>
                  <div className="text-right">
                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">30 Hari ({dailyDistance}km/h)</p>
-                   <p className="text-base font-black text-green-600">Rp {Math.round((dailyDistance / parseFloat(selectedCarData1['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin1.spbu, userBensin1.ron) * 30).toLocaleString('id-ID')}</p>
+                   <p className={`text-base font-black ${cost1 < cost2 ? 'text-green-600' : cost1 > cost2 ? 'text-red-600' : 'text-gray-900'}`}>Rp {cost1.toLocaleString('id-ID')}</p>
                  </div>
                </div>
             </div>
@@ -293,47 +281,53 @@ export default function CompareResult({
 
             {/* Mobil 2 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO */}
-               <div className="absolute -right-4 -top-4 opacity-[0.06] w-28 h-28 pointer-events-none">
+               {/* FADING LOGO (OPACITY 0.15) */}
+               <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
                   <BrandLogo make={selectedCarData2.Make} />
                </div>
 
                <div className="relative z-10 flex flex-col gap-1">
                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{selectedCarData2.Make} {selectedCarData2.Year}</p>
-                 {/* Hapus Truncate, biarin wrapping 2 baris rapi */}
                  <p className="text-lg font-black text-gray-900 leading-tight w-full pr-4">{selectedCarData2.Type}</p>
                  <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData2.Transmission} • {selectedCarData2['Engine Displacement']} cc</p>
                </div>
 
-               {/* REVISI: GRID DALKOT & LUKOT BERDAMPINGAN */}
+               {/* GRID DALKOT & LUKOT */}
                <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
-                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Dalkot</p>
-                    <p className="text-sm font-black text-gray-900">{selectedCarData2['City Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 <div className={`rounded-lg p-2 text-center border shadow-sm ${dalkot2 > dalkot1 ? 'bg-green-50 border-green-200' : dalkot2 < dalkot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                    <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${dalkot2 > dalkot1 ? 'text-green-700' : dalkot2 < dalkot1 ? 'text-red-700' : 'text-gray-500'}`}>Dalkot</p>
+                    <p className={`text-sm font-black ${dalkot2 > dalkot1 ? 'text-green-700' : dalkot2 < dalkot1 ? 'text-red-700' : 'text-gray-900'}`}>{dalkot2} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
-                 <div className="bg-white rounded-lg p-2 text-center border border-gray-100 shadow-sm">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Luar Kota</p>
-                    <p className="text-sm font-black text-gray-900">{selectedCarData2['Highway Fuel Consumption (km/l)']} <span className="text-[9px] font-normal text-gray-500">km/l</span></p>
+                 <div className={`rounded-lg p-2 text-center border shadow-sm ${lukot2 > lukot1 ? 'bg-green-50 border-green-200' : lukot2 < lukot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                    <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${lukot2 > lukot1 ? 'text-green-700' : lukot2 < lukot1 ? 'text-red-700' : 'text-gray-500'}`}>Luar Kota</p>
+                    <p className={`text-sm font-black ${lukot2 > lukot1 ? 'text-green-700' : lukot2 < lukot1 ? 'text-red-700' : 'text-gray-900'}`}>{lukot2} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
                </div>
 
-               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5">
-                 <div className="flex items-center gap-1.5">
-                   <img src={spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
-                   <span className="text-xs font-black text-gray-700">{ronMap.find(r => r.id === userBensin2.ron)?.val}</span>
+               <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5 mt-1">
+                 <div>
+                   <div className="flex items-center gap-1.5 mb-1">
+                     <img src={spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                     <span className="text-xs font-black text-gray-700">RON {ronMap.find(r => r.id === userBensin2.ron)?.val}</span>
+                   </div>
+                   <p className="text-[9px] text-gray-500 font-bold">Rp {getHargaUserBensin(userBensin2.spbu, userBensin2.ron).toLocaleString('id-ID')}/L</p>
                  </div>
                  <div className="text-right">
                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">30 Hari ({dailyDistance}km/h)</p>
-                   <p className="text-base font-black text-green-600">Rp {Math.round((dailyDistance / parseFloat(selectedCarData2['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin2.spbu, userBensin2.ron) * 30).toLocaleString('id-ID')}</p>
+                   <p className={`text-base font-black ${cost2 < cost1 ? 'text-green-600' : cost2 > cost1 ? 'text-red-600' : 'text-gray-900'}`}>Rp {cost2.toLocaleString('id-ID')}</p>
                  </div>
                </div>
             </div>
 
           </div>
 
-          <div className="absolute bottom-8 flex items-center justify-center gap-2 opacity-50 relative z-20 mt-5">
-            <img src={mainLogo.src} crossOrigin="anonymous" className="h-4 grayscale" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">bbm-tracker.vercel.app</span>
+          {/* WATERMARK BAWAH RATA TENGAH (SESUAI REQUEST) */}
+          <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
+              <img src={mainLogo.src} crossOrigin="anonymous" className="h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">bbm-tracker.vercel.app</span>
           </div>
 
         </div>

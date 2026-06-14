@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
-import { ChevronDown, Car } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, Car, X } from "lucide-react";
 
 // Komponen helper buat nampilin logo secara dinamis & aman dari error
 const BrandLogo = ({ make }: { make: string }) => {
   const [hasError, setHasError] = useState(false);
-  
-  // Ubah format teks jadi aman buat nama file (contoh: "Land Rover" -> "land-rover")
   const safeMake = make ? make.toLowerCase().replace(/\s+/g, '-') : '';
 
   if (hasError || !safeMake) {
@@ -17,7 +15,7 @@ const BrandLogo = ({ make }: { make: string }) => {
       src={`/logos/${safeMake}.png`}
       alt={make}
       className="w-6 h-6 object-contain"
-      onError={() => setHasError(true)} // Kalo gambar ga ketemu, otomatis balik ke icon bawaan
+      onError={() => setHasError(true)} 
     />
   );
 };
@@ -40,19 +38,34 @@ export default function CarSelector({
   useEffect(() => { setSearchMake(selectedMake); }, [selectedMake]);
   useEffect(() => { setSearchType(selectedType); }, [selectedType]);
 
+  const clearMake = () => {
+    setSelectedMake("");
+    setSearchMake("");
+    // Otomatis reset input turunannya
+    setSelectedType("");
+    setSearchType("");
+    setSelectedYear("");
+    setSelectedTrans("");
+  };
+
+  const clearType = () => {
+    setSelectedType("");
+    setSearchType("");
+    setSelectedYear("");
+    setSelectedTrans("");
+  };
+
   return (
     <div className="space-y-4">
       {/* Autocomplete Merek */}
       <div className="relative">
         <div className="relative">
-          {/* Posisi Logo di dalem Input */}
           <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 pointer-events-none">
             <BrandLogo make={selectedMake} />
           </div>
           
           <input 
             type="text" placeholder={placeholderMake}
-            // perhatiin ada tambahan pl-12 biar teksnya agak geser ke kanan ngasih ruang buat logo
             className="w-full border border-gray-300 rounded-xl py-3 pl-12 pr-10 bg-white text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-bold placeholder:text-xs placeholder:uppercase placeholder:tracking-wider outline-none focus:ring-2 focus:ring-green-500"
             value={searchMake}
             onChange={(e) => {
@@ -63,7 +76,15 @@ export default function CarSelector({
             onFocus={() => setIsMakeOpen(true)}
             onBlur={() => setTimeout(() => setIsMakeOpen(false), 200)} 
           />
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+             {searchMake && (
+               <button onClick={clearMake} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition">
+                 <X className="w-4 h-4" />
+               </button>
+             )}
+             <ChevronDown className="w-5 h-5 text-gray-400 pointer-events-none" />
+          </div>
         </div>
         
         {isMakeOpen && makes.length > 0 && (
@@ -71,12 +92,9 @@ export default function CarSelector({
             {makes.filter((m: string) => m.toLowerCase().includes(searchMake.toLowerCase())).map((m: string, idx: number) => (
               <div key={idx} className="p-3 border-b border-gray-100 hover:bg-green-50 cursor-pointer transition-colors flex items-center gap-3"
                 onClick={() => { setSelectedMake(m); setIsMakeOpen(false); }}>
-                
-                {/* Lingkaran Logo di List Dropdown */}
                 <div className="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1">
                   <BrandLogo make={m} />
                 </div>
-                
                 <span className="text-sm font-bold text-gray-800">{m}</span>
               </div>
             ))}
@@ -100,7 +118,15 @@ export default function CarSelector({
             onBlur={() => setTimeout(() => setIsTypeOpen(false), 200)} 
             disabled={!selectedMake}
           />
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+             {searchType && (
+               <button onClick={clearType} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition">
+                 <X className="w-4 h-4" />
+               </button>
+             )}
+             <ChevronDown className="w-5 h-5 text-gray-400 pointer-events-none" />
+          </div>
         </div>
         
         {isTypeOpen && types.length > 0 && (

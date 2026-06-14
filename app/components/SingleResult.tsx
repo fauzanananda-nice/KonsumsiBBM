@@ -56,18 +56,18 @@ export default function SingleResult({
       });
       if (!blob) throw new Error('Gagal bikin gambar');
 
-      const file = new File([blob], 'bbm-tracker-single.png', { type: 'image/png' });
+      const file = new File([blob], 'exum-tracker-single.png', { type: 'image/png' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'Hasil Cek Konsumsi BBM',
-          text: `Gila! Estimasi dalkot ${selectedCarData.Make} ${selectedCarData.Type} tembus segini. Cek di BBM Tracker!`,
+          text: `Gila! Estimasi dalkot ${selectedCarData.Make} ${selectedCarData.Type} tembus segini. Cek di EXUM Calculator!`,
           files: [file],
         });
       } else {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'bbm-tracker-single.png';
+        link.download = 'exum-tracker-single.png';
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
@@ -84,7 +84,7 @@ export default function SingleResult({
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA (TETAP SAMA) */}
+      {/* UI UTAMA (TETAP SAMA, GAK DISENTUH SCREENSHOT) */}
       <div className="bg-white pb-4">
         <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 shrink-0">
@@ -181,15 +181,14 @@ export default function SingleResult({
 
           <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden shadow-sm">
             
-            {/* BACKGROUND FADING LOGO KAYA DI COMPARE */}
-            <div className="absolute -right-8 -top-8 opacity-[0.06] w-64 h-64 pointer-events-none">
+            {/* BACKGROUND FADING LOGO (OPACITY 0.15) */}
+            <div className="absolute -right-8 -top-8 opacity-[0.15] w-64 h-64 pointer-events-none">
                <BrandLogo make={selectedCarData.Make} />
             </div>
 
             {/* HEADER MOBIL YANG DI-MAXIMIZE */}
             <div className="relative z-10">
                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">{selectedCarData.Make} {selectedCarData.Year}</p>
-               {/* Ini yang bikin teksnya bisa wrapping rapi ke bawah mengisi space kosong */}
                <p className="text-3xl font-black text-gray-900 leading-tight pr-6">{selectedCarData.Type}</p>
                <p className="text-xs font-medium text-gray-500 mt-2">{selectedCarData.Transmission} • {selectedCarData['Engine Displacement']} cc</p>
             </div>
@@ -198,22 +197,26 @@ export default function SingleResult({
             <div className="grid grid-cols-2 gap-4 relative z-10">
                <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Dalam Kota</p>
-                  <p className="text-3xl font-black text-gray-900">{selectedCarData['City Fuel Consumption (km/l)']}</p>
+                  <p className="text-3xl font-black text-gray-900">{selectedCarData['City Fuel Consumption (km/l)']} <span className="text-[10px] font-normal text-gray-500">km/l</span></p>
                </div>
                <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Luar Kota</p>
-                  <p className="text-3xl font-black text-gray-900">{selectedCarData['Highway Fuel Consumption (km/l)']}</p>
+                  <p className="text-3xl font-black text-gray-900">{selectedCarData['Highway Fuel Consumption (km/l)']} <span className="text-[10px] font-normal text-gray-500">km/l</span></p>
                </div>
             </div>
 
             {/* BOX BIAYA */}
             <div className="bg-green-50 rounded-2xl p-5 border border-green-200 text-center relative z-10">
                <p className="text-[10px] font-bold text-green-700 uppercase mb-2 tracking-widest">Estimasi Biaya ({dailyDistance}km/hari)</p>
-               <div className="flex items-center justify-center gap-2 mb-2">
+               
+               {/* TAMPILAN BENSIN & HARGA */}
+               <div className="flex items-center justify-center gap-2 mb-1">
                   <img src={spbuMap.find(s => s.id === userBensin.spbu)?.logo.src} crossOrigin="anonymous" className="h-5 object-contain" />
-                  <span className="text-sm font-black text-green-800">{ronMap.find(r => r.id === userBensin.ron)?.val}</span>
+                  <span className="text-sm font-black text-green-800">RON {ronMap.find(r => r.id === userBensin.ron)?.val}</span>
                </div>
-               <p className="text-4xl font-black text-green-700 my-3">
+               <p className="text-[10px] font-medium text-green-700 mb-2">Rp {getHargaUserBensin(userBensin.spbu, userBensin.ron).toLocaleString('id-ID')}/L</p>
+
+               <p className="text-4xl font-black text-green-700 mt-2 mb-3">
                  Rp {Math.round((dailyDistance / parseFloat(selectedCarData['City Fuel Consumption (km/l)'])) * getHargaUserBensin(userBensin.spbu, userBensin.ron) * 30).toLocaleString('id-ID')}
                </p>
                <p className="text-[10px] text-green-600/70 font-bold uppercase tracking-widest">Total per 30 Hari</p>
@@ -221,10 +224,13 @@ export default function SingleResult({
 
           </div>
 
-          {/* Watermark Margin */}
-          <div className="absolute bottom-8 flex items-center justify-center gap-2 opacity-50 relative z-20 mt-6">
-            <img src={mainLogo.src} crossOrigin="anonymous" className="h-4 grayscale" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">bbm-tracker.vercel.app</span>
+          {/* WATERMARK BAWAH RATA TENGAH (SESUAI REQUEST) */}
+          <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
+              <img src={mainLogo.src} crossOrigin="anonymous" className="h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">bbm-tracker.vercel.app</span>
           </div>
 
         </div>

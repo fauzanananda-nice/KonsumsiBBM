@@ -10,7 +10,7 @@ import logo from "./logo.png";
 import CarSelector from "./components/CarSelector";
 import SingleResult from "./components/SingleResult";
 import CompareResult from "./components/CompareResult";
-import AboutModal from "./components/AboutModal"; // Import modal baru
+import AboutModal from "./components/AboutModal"; 
 import FeedbackModal from "./components/FeedbackModal";
 
 export default function Home() {
@@ -141,13 +141,12 @@ export default function Home() {
   };
 
   return (
-    // Tambah flex-col biar teks footer ada di bawah box utama
     <main className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans text-gray-900 flex flex-col justify-center items-center">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl p-6 relative">
         
-        {/* HEADER */}
-        <div className="flex flex-col items-center gap-2 mb-8">
-          <Image src={logo} alt="Logo" className="h-16 w-auto object-contain" priority/>
+        {/* HEADER: Ukuran logo dikecilin jadi h-14 biar proporsional */}
+        <div className="flex flex-col items-center gap-2 mb-8 mt-2">
+          <Image src={logo} alt="Logo" className="h-12 w-auto object-contain" priority/>
           {dbError && <div className="bg-red-50 text-red-600 p-3 rounded-xl w-full text-xs font-mono text-center mt-4">🚨 Error DB: {dbError}</div>}
         </div>
         
@@ -196,7 +195,7 @@ export default function Home() {
 
       {/* FOOTER LINK ABOUT & FEEDBACK */}
       <div className="mt-6 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-400 font-medium tracking-wide">
-        <span>© 2026 BBM Tracker</span>
+        <span>© 2026 EXUM Calculator</span>
         <span>•</span>
         <button onClick={() => setIsAboutOpen(true)} className="hover:text-gray-600 transition">Tentang & Disclaimer</button>
         <span>•</span>
