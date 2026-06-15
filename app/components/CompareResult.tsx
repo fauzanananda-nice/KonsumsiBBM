@@ -50,10 +50,21 @@ export default function CompareResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      const blob = await toBlob(captureRef.current, { 
+      const el = captureRef.current;
+      
+      // JURUS ANTI-IOS: WARM UP RENDER
+      await toBlob(el, { cacheBust: true, pixelRatio: 1 }); 
+      await new Promise(resolve => setTimeout(resolve, 300)); 
+      await toBlob(el, { cacheBust: true, pixelRatio: 1 });
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // THE REAL CAPTURE 
+      const blob = await toBlob(el, { 
         cacheBust: true,
-        pixelRatio: 2
+        pixelRatio: 2,
+        backgroundColor: '#f3f4f6', 
       });
+
       if (!blob) throw new Error('Gagal bikin gambar');
 
       const file = new File([blob], 'exum-tracker-vs.png', { type: 'image/png' });
@@ -93,7 +104,7 @@ export default function CompareResult({
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA (TETAP SAMA, GAK DISENTUH SCREENSHOT) */}
+      {/* UI UTAMA */}
       <div className="bg-white pb-4 pt-2">
         <div className="grid grid-cols-2 gap-2 mb-4 text-center">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
@@ -117,20 +128,28 @@ export default function CompareResult({
         <p className="text-center text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest mt-6">Dalam Kota (km/l)</p>
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className={`p-4 rounded-xl text-center border ${dalkot1 > dalkot2 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${dalkot1 > dalkot2 ? 'text-green-600' : 'text-red-600'}`}>{dalkot1}</p>
+            <p className={`text-2xl font-black ${dalkot1 > dalkot2 ? 'text-green-600' : 'text-red-600'}`}>
+              {dalkot1} <span className="text-sm font-normal text-gray-500">km/l</span>
+            </p>
           </div>
           <div className={`p-4 rounded-xl text-center border ${dalkot2 > dalkot1 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${dalkot2 > dalkot1 ? 'text-green-600' : 'text-red-600'}`}>{dalkot2}</p>
+            <p className={`text-2xl font-black ${dalkot2 > dalkot1 ? 'text-green-600' : 'text-red-600'}`}>
+              {dalkot2} <span className="text-sm font-normal text-gray-500">km/l</span>
+            </p>
           </div>
         </div>
 
         <p className="text-center text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest mt-6">Luar Kota (km/l)</p>
         <div className="grid grid-cols-2 gap-2 mb-6">
           <div className={`p-4 rounded-xl text-center border ${lukot1 > lukot2 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${lukot1 > lukot2 ? 'text-green-600' : 'text-red-600'}`}>{lukot1}</p>
+            <p className={`text-2xl font-black ${lukot1 > lukot2 ? 'text-green-600' : 'text-red-600'}`}>
+              {lukot1} <span className="text-sm font-normal text-gray-500">km/l</span>
+            </p>
           </div>
           <div className={`p-4 rounded-xl text-center border ${lukot2 > lukot1 ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'}`}>
-            <p className={`text-2xl font-black ${lukot2 > lukot1 ? 'text-green-600' : 'text-red-600'}`}>{lukot2}</p>
+            <p className={`text-2xl font-black ${lukot2 > lukot1 ? 'text-green-600' : 'text-red-600'}`}>
+              {lukot2} <span className="text-sm font-normal text-gray-500">km/l</span>
+            </p>
           </div>
         </div>
 
@@ -147,6 +166,7 @@ export default function CompareResult({
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
+            {/* Radio M1 */}
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">BBM M1</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -173,6 +193,7 @@ export default function CompareResult({
               <p className="text-[10px] font-bold text-gray-400 text-center">Rp {getHargaUserBensin(userBensin1.spbu, userBensin1.ron).toLocaleString('id-ID')}/L</p>
             </div>
 
+            {/* Radio M2 */}
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">BBM M2</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -237,7 +258,7 @@ export default function CompareResult({
             
             {/* Mobil 1 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO (OPACITY 0.15) */}
+               {/* FADING LOGO */}
                <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
                   <BrandLogo make={selectedCarData1.Make} />
                </div>
@@ -281,7 +302,7 @@ export default function CompareResult({
 
             {/* Mobil 2 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO (OPACITY 0.15) */}
+               {/* FADING LOGO */}
                <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
                   <BrandLogo make={selectedCarData2.Make} />
                </div>
@@ -321,13 +342,13 @@ export default function CompareResult({
 
           </div>
 
-          {/* WATERMARK BAWAH RATA TENGAH (SESUAI REQUEST) */}
+          {/* WATERMARK BAWAH RATA TENGAH */}
           <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
-              <img src={mainLogo.src} crossOrigin="anonymous" className="h-5" />
+              <img src={mainLogo.src} crossOrigin="anonymous" className="h-7" />
             </div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">bbm-tracker.vercel.app</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">exum-bbm.site</span>
           </div>
 
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { Gauge, Swords, X } from "lucide-react";
+import { Car, Gauge, Swords, X } from "lucide-react";
 
 // Import Logo & Komponen
 import logo from "./logo.png";
@@ -12,11 +12,13 @@ import SingleResult from "./components/SingleResult";
 import CompareResult from "./components/CompareResult";
 import AboutModal from "./components/AboutModal"; 
 import FeedbackModal from "./components/FeedbackModal";
+import UpdateModal from "./components/UpdateModal"; // IMPORT MODAL BARU
 
 export default function Home() {
   const [rawCars, setRawCars] = useState<any[]>([]);
   const [katalogHarga, setKatalogHarga] = useState<any[]>([]);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false); // STATE MODAL BARU
 
   // State Mobil 1
   const [makes, setMakes] = useState<string[]>([]);
@@ -141,44 +143,47 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans text-gray-900 flex flex-col justify-center items-center">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl p-6 relative">
+    <main className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans text-gray-900 flex flex-col justify-center items-center relative overflow-hidden">
+      
+      {/* Container Utama */}
+      <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl p-6 relative z-10 transition-all duration-300">
         
-        {/* HEADER: Ukuran logo dikecilin jadi h-14 biar proporsional */}
+        {/* HEADER AREA */}
         <div className="flex flex-col items-center gap-2 mb-8 mt-2">
-          <Image src={logo} alt="Logo" className="h-12 w-auto object-contain" priority/>
+          <Image src={logo} alt="Logo EXUM" className="h-14 w-auto object-contain transition-transform" priority/>
           {dbError && <div className="bg-red-50 text-red-600 p-3 rounded-xl w-full text-xs font-mono text-center mt-4">🚨 Error DB: {dbError}</div>}
         </div>
         
         {/* MOBIL 1 */}
-        <div className={`space-y-4 ${viewMode === "compareSetup" || viewMode === "compareResult" ? "opacity-50 pointer-events-none hidden" : ""}`}>
+        <div className={`space-y-4 transition-opacity duration-300 ${viewMode === "compareSetup" || viewMode === "compareResult" ? "opacity-50 pointer-events-none hidden" : "animate-in fade-in"}`}>
+          {/* CarSelector sekarang menangani mode Bensin/Diesel di dalamnya */}
           <CarSelector makes={makes} types={types} years={years} transmissions={transmissions} selectedMake={selectedMake} setSelectedMake={setSelectedMake} selectedType={selectedType} setSelectedType={setSelectedType} selectedYear={selectedYear} setSelectedYear={setSelectedYear} selectedTrans={selectedTrans} setSelectedTrans={setSelectedTrans} placeholderMake="Merek Mobil" placeholderType="Model Mobil"/>
           {viewMode === "none" || viewMode === "single" ? (
             <div className="pt-4 flex gap-3">
-              <button onClick={handleCek} disabled={!selectedTrans || katalogHarga.length === 0} className="flex-1 bg-green-600 text-white font-bold py-4 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2 transition active:scale-95"><Gauge className="w-5 h-5"/> Cek</button>
-              <button onClick={handleVsSetup} disabled={!selectedTrans || katalogHarga.length === 0} className="flex-1 bg-white border text-gray-700 font-bold uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2 transition active:scale-95"><Swords className="w-5 h-5"/> Vs</button>
+              <button onClick={handleCek} disabled={!selectedTrans || katalogHarga.length === 0} className="flex-1 bg-green-600 text-white font-bold py-4 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2 transition active:scale-95 shadow-sm hover:bg-green-700"><Gauge className="w-5 h-5"/> Cek</button>
+              <button onClick={handleVsSetup} disabled={!selectedTrans || katalogHarga.length === 0} className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2 transition active:scale-95 hover:bg-gray-50"><Swords className="w-5 h-5"/> Vs</button>
             </div>
           ) : null}
         </div>
 
-        {/* MOBIL 2 */}
+        {/* MOBIL 2 (COMPARE) */}
         {(viewMode === "compareSetup" || viewMode === "compareResult") && (
-          <div className="relative animate-in fade-in slide-in-from-top-4">
-            <button onClick={() => {setViewMode("single"); setSelectedMake2(""); setSelectedType2(""); setSelectedYear2(""); setSelectedTrans2("");}} className="absolute -top-3 right-0 bg-white p-1 rounded-full text-gray-400 hover:text-gray-600 border border-gray-200 shadow-sm z-10"><X className="w-4 h-4"/></button>
+          <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
+            <button onClick={() => {setViewMode("single"); setSelectedMake2(""); setSelectedType2(""); setSelectedYear2(""); setSelectedTrans2("");}} className="absolute -top-3 right-0 bg-white p-1.5 rounded-full text-gray-400 hover:text-red-500 border border-gray-200 shadow-sm z-10 transition-colors"><X className="w-4 h-4"/></button>
             <h2 className="text-center font-black text-green-600 uppercase tracking-widest mb-4 flex justify-center items-center gap-2"><Swords className="w-5 h-5"/> Pilih Lawan</h2>
             
             {selectedCarData1 && viewMode === "compareSetup" && (
-              <div className="bg-green-50 border-green-200 p-3 rounded-xl mb-4 text-center shadow-sm">
+              <div className="bg-green-50 border border-green-200 p-3 rounded-xl mb-5 text-center shadow-sm">
                 <p className="text-[10px] text-green-700 uppercase font-bold tracking-wider mb-1">Mobil 1 (Andalan)</p>
                 <p className="text-sm font-black text-gray-900">{selectedCarData1.Make} {selectedCarData1.Type}</p>
-                <p className="text-xs font-medium text-gray-500 mt-0.5">{selectedCarData1.Year} • {selectedCarData1.Transmission}</p>
+                <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData1.Year} • {selectedCarData1.Transmission}</p>
               </div>
             )}
 
             <div className={`space-y-4 ${viewMode === "compareResult" ? "hidden" : ""}`}>
               <CarSelector makes={makes} types={types2} years={years2} transmissions={transmissions2} selectedMake={selectedMake2} setSelectedMake={setSelectedMake2} selectedType={selectedType2} setSelectedType={setSelectedType2} selectedYear={selectedYear2} setSelectedYear={setSelectedYear2} selectedTrans={selectedTrans2} setSelectedTrans={setSelectedTrans2} placeholderMake="Merek Lawan" placeholderType="Model Lawan"/>
               {viewMode === "compareSetup" && (
-                <button onClick={handleAdu} disabled={!selectedTrans2} className="w-full bg-green-600 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 mt-4 shadow-lg shadow-green-600/20 flex justify-center items-center gap-2"><Swords className="w-5 h-5"/> Adu Mekanik!</button>
+                <button onClick={handleAdu} disabled={!selectedTrans2} className="w-full bg-gray-900 text-white font-black uppercase tracking-widest py-4 rounded-xl disabled:opacity-50 transition active:scale-95 mt-4 shadow-lg shadow-gray-900/20 hover:bg-black flex justify-center items-center gap-2"><Swords className="w-5 h-5"/> Adu Mekanik!</button>
               )}
             </div>
           </div>
@@ -194,17 +199,21 @@ export default function Home() {
       </div>
 
       {/* FOOTER LINK ABOUT & FEEDBACK */}
-      <div className="mt-6 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-400 font-medium tracking-wide">
+      <div className="mt-8 flex flex-wrap justify-center gap-x-3 gap-y-2 text-xs text-gray-400 font-medium tracking-wide z-10">
         <span>© 2026 EXUM Calculator</span>
-        <span>•</span>
+        <span className="opacity-50">•</span>
         <button onClick={() => setIsAboutOpen(true)} className="hover:text-gray-600 transition">Tentang & Disclaimer</button>
-        <span>•</span>
+        <span className="opacity-50">•</span>
         <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-green-600 font-bold transition">Kritik & Saran</button>
+        <span className="opacity-50">•</span>
+        {/* TOMBOL UPDATE DEV */}
+        <button onClick={() => setIsUpdateOpen(true)} className="hover:text-blue-500 font-bold transition">🛠️ Update Dev</button>
       </div>
 
-      {/* RENDER MODAL TENTANG & FEEDBACK */}
+      {/* RENDER MODAL */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+      <UpdateModal isOpen={isUpdateOpen} onClose={() => setIsUpdateOpen(false)} />
     </main>
   );
 }

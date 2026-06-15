@@ -50,9 +50,18 @@ export default function SingleResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      const blob = await toBlob(captureRef.current, { 
+      const el = captureRef.current;
+      
+      // JURUS ANTI-IOS: WARM UP RENDER
+      await toBlob(el, { cacheBust: true, pixelRatio: 1 }); 
+      await new Promise(resolve => setTimeout(resolve, 300)); 
+      await toBlob(el, { cacheBust: true, pixelRatio: 1 });
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const blob = await toBlob(el, { 
         cacheBust: true, 
-        pixelRatio: 2 
+        pixelRatio: 2,
+        backgroundColor: '#f3f4f6', 
       });
       if (!blob) throw new Error('Gagal bikin gambar');
 
@@ -84,7 +93,7 @@ export default function SingleResult({
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA (TETAP SAMA, GAK DISENTUH SCREENSHOT) */}
+      {/* UI UTAMA */}
       <div className="bg-white pb-4">
         <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 shrink-0">
@@ -181,7 +190,7 @@ export default function SingleResult({
 
           <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden shadow-sm">
             
-            {/* BACKGROUND FADING LOGO (OPACITY 0.15) */}
+            {/* BACKGROUND FADING LOGO */}
             <div className="absolute -right-8 -top-8 opacity-[0.15] w-64 h-64 pointer-events-none">
                <BrandLogo make={selectedCarData.Make} />
             </div>
@@ -224,13 +233,13 @@ export default function SingleResult({
 
           </div>
 
-          {/* WATERMARK BAWAH RATA TENGAH (SESUAI REQUEST) */}
+          {/* WATERMARK BAWAH RATA TENGAH */}
           <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
-              <img src={mainLogo.src} crossOrigin="anonymous" className="h-5" />
+              <img src={mainLogo.src} crossOrigin="anonymous" className="h-7" />
             </div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">bbm-tracker.vercel.app</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">exum-bbm.site</span>
           </div>
 
         </div>

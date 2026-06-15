@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { Fuel, Inbox, LogOut, Save, Wrench, Trash2, Rocket, Bug } from "lucide-react";
+import { Fuel, Inbox, LogOut, Save, Wrench, Trash2 } from "lucide-react";
 
 // Import Logo SPBU 
 import pertaminaLogo from "../pertamina.png";
@@ -118,12 +118,12 @@ export default function AdminPage() {
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required 
-              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 outline-none focus:ring-2 focus:ring-green-500 text-gray-900" />
+              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 outline-none focus:ring-2 focus:ring-green-500" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required 
-              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 outline-none focus:ring-2 focus:ring-green-500 text-gray-900" />
+              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 outline-none focus:ring-2 focus:ring-green-500" />
           </div>
           <button type="submit" disabled={loading} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl mt-4 hover:bg-green-700 transition">
             {loading ? "Memeriksa..." : "Masuk Kandang"}
@@ -138,35 +138,6 @@ export default function AdminPage() {
     acc[curr.spbu_id].push(curr);
     return acc;
   }, {});
-
-  // HELPER buat nge-render history update berdasarkan kategori di Admin
-  const renderAdminUpdateHistory = (category: string, icon: any, title: string, color: string) => {
-    const filtered = devUpdates.filter(u => u.category === category);
-    if (filtered.length === 0) return null;
-    return (
-      <div className="mb-6">
-        <h3 className={`flex items-center gap-2 text-sm font-black uppercase tracking-widest mb-3 ${color}`}>
-          {icon} {title}
-        </h3>
-        <div className="space-y-3">
-          {filtered.map((upd) => (
-             <div key={upd.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-               <div className="flex-1">
-                 <h4 className="font-black text-gray-900 text-sm">{upd.title}</h4>
-                 <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap">{upd.description}</p>
-                 <p className="text-[10px] font-bold text-gray-400 mt-2">
-                   {new Date(upd.created_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })} • {new Date(upd.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })} WIB
-                 </p>
-               </div>
-               <button onClick={() => handleDeleteUpdate(upd.id)} className="text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 p-2 rounded-lg transition shrink-0" title="Hapus Catatan">
-                  <Trash2 className="w-5 h-5"/>
-               </button>
-             </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
@@ -252,7 +223,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* TAB UPDATE DEV */}
+          {/* TAB UPDATE DEV (FITUR BARU) */}
           {activeTab === "update_dev" && (
             <div className="animate-in fade-in">
               <h2 className="text-lg font-black mb-6 text-gray-800">Catatan Bengkel Dev</h2>
@@ -266,27 +237,33 @@ export default function AdminPage() {
                        <option value="lagi_dikerjain">🛠️ Lagi Dikerjain</option>
                        <option value="known_issue">🐛 Known Issue</option>
                     </select>
-                    {/* FIXED: Tambahin text-gray-900 biar item pekat */}
-                    <input type="text" placeholder="Judul Update" value={newUpdateTitle} onChange={(e) => setNewUpdateTitle(e.target.value)} required className="w-full md:w-2/3 border border-gray-300 rounded-xl p-3 bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium text-gray-900" />
+                    <input type="text" placeholder="Judul Update" value={newUpdateTitle} onChange={(e) => setNewUpdateTitle(e.target.value)} required className="w-full md:w-2/3 border border-gray-300 rounded-xl p-3 bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium" />
                   </div>
-                  {/* FIXED: Tambahin text-gray-900 biar item pekat */}
-                  <textarea placeholder="Deskripsi detail update..." value={newUpdateDesc} onChange={(e) => setNewUpdateDesc(e.target.value)} required rows={3} className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium resize-none text-gray-900" />
+                  <textarea placeholder="Deskripsi detail update..." value={newUpdateDesc} onChange={(e) => setNewUpdateDesc(e.target.value)} required rows={3} className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium resize-none" />
                   <button type="submit" disabled={submitLoading} className="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition disabled:opacity-50 text-sm flex items-center justify-center gap-2">
                      {submitLoading ? "Menyimpan..." : <><Save className="w-4 h-4"/> Posting Update</>}
                   </button>
                 </form>
               </div>
 
-              {/* RENDER CURRENT UPDATE BERDASARKAN KATEGORI */}
-              <div>
-                <h3 className="font-bold text-sm text-gray-800 mb-4 uppercase tracking-widest border-b border-gray-200 pb-2">History Update Saat Ini</h3>
-                {devUpdates.length === 0 && <p className="text-center text-gray-400 font-medium py-6">Belum ada history update.</p>}
-                
-                {renderAdminUpdateHistory('baru_rilis', <Rocket className="w-4 h-4" />, 'Baru Rilis', 'text-green-600')}
-                {renderAdminUpdateHistory('lagi_dikerjain', <Wrench className="w-4 h-4" />, 'Lagi Dikerjain', 'text-blue-600')}
-                {renderAdminUpdateHistory('known_issue', <Bug className="w-4 h-4" />, 'Known Issue', 'text-red-600')}
+              <div className="space-y-4">
+                {devUpdates.length === 0 && <p className="text-center text-gray-400 font-medium py-10">Belum ada history update.</p>}
+                {devUpdates.map((upd) => (
+                   <div key={upd.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                     <div className="flex-1">
+                       <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider mb-2 inline-block ${upd.category === 'baru_rilis' ? 'bg-green-100 text-green-700' : upd.category === 'lagi_dikerjain' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                          {upd.category === 'baru_rilis' ? '🚀 Baru Rilis' : upd.category === 'lagi_dikerjain' ? '🛠️ Lagi Dikerjain' : '🐛 Known Issue'}
+                       </span>
+                       <h4 className="font-black text-gray-900">{upd.title}</h4>
+                       <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{upd.description}</p>
+                       <p className="text-[10px] font-bold text-gray-400 mt-3">{new Date(upd.created_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                     </div>
+                     <button onClick={() => handleDeleteUpdate(upd.id)} className="text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 p-2 rounded-lg transition" title="Hapus Catatan">
+                        <Trash2 className="w-5 h-5"/>
+                     </button>
+                   </div>
+                ))}
               </div>
-
             </div>
           )}
 
