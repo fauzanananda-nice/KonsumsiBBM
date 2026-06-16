@@ -86,7 +86,7 @@ export default function SingleResult({
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA */}
+      {/* UI UTAMA (Shadow Tetep Aman di Sini) */}
       <div className="bg-white pb-4">
         <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 shrink-0">
@@ -176,13 +176,15 @@ export default function SingleResult({
       {/* ========================================== */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
         <div ref={captureRef} 
-             className="w-[405px] h-[720px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center p-6 relative font-sans">
+             style={{ background: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)' }} 
+             className="w-[405px] h-[720px] flex flex-col items-center justify-center p-6 relative font-sans">
           
           <h2 className="text-2xl font-black text-green-600 tracking-widest uppercase mb-6 flex items-center gap-2 relative z-20">
             <Map className="w-6 h-6"/> Hasil Kalkulasi
           </h2>
 
-          <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden shadow-sm">
+          {/* FIX: shadow-sm dihapus dari wrapper utama biar murni pake border */}
+          <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden">
             
             <div className="absolute -right-8 -top-8 opacity-[0.15] w-64 h-64 pointer-events-none">
                <BrandLogo make={selectedCarData.Make} />
@@ -195,11 +197,13 @@ export default function SingleResult({
             </div>
             
             <div className="grid grid-cols-2 gap-4 relative z-10">
-               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
+               {/* FIX: shadow-sm dihapus */}
+               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Dalam Kota</p>
                   <p className="text-3xl font-black text-gray-900">{selectedCarData['City Fuel Consumption (km/l)']} <span className="text-[10px] font-normal text-gray-500">km/l</span></p>
                </div>
-               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 shadow-sm">
+               {/* FIX: shadow-sm dihapus */}
+               <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Luar Kota</p>
                   <p className="text-3xl font-black text-gray-900">{selectedCarData['Highway Fuel Consumption (km/l)']} <span className="text-[10px] font-normal text-gray-500">km/l</span></p>
                </div>

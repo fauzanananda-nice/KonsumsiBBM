@@ -94,7 +94,7 @@ export default function CompareResult({
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA */}
+      {/* UI UTAMA (Shadow Tetep Aman di Sini) */}
       <div className="bg-white pb-4 pt-2">
         <div className="grid grid-cols-2 gap-2 mb-4 text-center">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
@@ -237,13 +237,15 @@ export default function CompareResult({
       {/* ========================================== */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
         <div ref={captureRef} 
-             className="w-[405px] h-[720px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center p-6 relative font-sans">
+             style={{ background: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)' }} 
+             className="w-[405px] h-[720px] flex flex-col items-center justify-center p-6 relative font-sans">
           
           <h2 className="text-2xl font-black text-green-600 uppercase tracking-widest mb-4 flex items-center gap-2 relative z-20">
             <Swords className="w-6 h-6"/> Adu Mekanik
           </h2>
 
-          <div className="bg-white w-full rounded-3xl border border-gray-200 p-5 flex flex-col gap-4 relative z-10 shadow-sm">
+          {/* FIX: shadow-sm dihapus dari wrapper utama */}
+          <div className="bg-white w-full rounded-3xl border border-gray-200 p-5 flex flex-col gap-4 relative z-10">
             
             {/* Mobil 1 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
@@ -257,13 +259,14 @@ export default function CompareResult({
                  <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData1.Transmission} • {selectedCarData1['Engine Displacement']} cc</p>
                </div>
 
-               {/* GRID DALKOT & LUKOT */}
                <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
-                 <div className={`rounded-lg p-2 text-center border shadow-sm ${dalkot1 > dalkot2 ? 'bg-green-50 border-green-200' : dalkot1 < dalkot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                 {/* FIX: shadow-sm dihapus */}
+                 <div className={`rounded-lg p-2 text-center border ${dalkot1 > dalkot2 ? 'bg-green-50 border-green-200' : dalkot1 < dalkot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                     <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${dalkot1 > dalkot2 ? 'text-green-700' : dalkot1 < dalkot2 ? 'text-red-700' : 'text-gray-500'}`}>Dalkot</p>
                     <p className={`text-sm font-black ${dalkot1 > dalkot2 ? 'text-green-700' : dalkot1 < dalkot2 ? 'text-red-700' : 'text-gray-900'}`}>{dalkot1} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
-                 <div className={`rounded-lg p-2 text-center border shadow-sm ${lukot1 > lukot2 ? 'bg-green-50 border-green-200' : lukot1 < lukot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                 {/* FIX: shadow-sm dihapus */}
+                 <div className={`rounded-lg p-2 text-center border ${lukot1 > lukot2 ? 'bg-green-50 border-green-200' : lukot1 < lukot2 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                     <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${lukot1 > lukot2 ? 'text-green-700' : lukot1 < lukot2 ? 'text-red-700' : 'text-gray-500'}`}>Luar Kota</p>
                     <p className={`text-sm font-black ${lukot1 > lukot2 ? 'text-green-700' : lukot1 < lukot2 ? 'text-red-700' : 'text-gray-900'}`}>{lukot1} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
@@ -284,8 +287,9 @@ export default function CompareResult({
                </div>
             </div>
 
+            {/* FIX: shadow-sm dihapus */}
             <div className="flex items-center justify-center -my-5 relative z-20">
-               <span className="bg-gray-900 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full border-[3px] border-white shadow-sm">VS</span>
+               <span className="bg-gray-900 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full border-[3px] border-white">VS</span>
             </div>
 
             {/* Mobil 2 */}
@@ -300,13 +304,14 @@ export default function CompareResult({
                  <p className="text-[10px] font-medium text-gray-500 mt-1">{selectedCarData2.Transmission} • {selectedCarData2['Engine Displacement']} cc</p>
                </div>
 
-               {/* GRID DALKOT & LUKOT */}
                <div className="relative z-10 grid grid-cols-2 gap-2 mt-1">
-                 <div className={`rounded-lg p-2 text-center border shadow-sm ${dalkot2 > dalkot1 ? 'bg-green-50 border-green-200' : dalkot2 < dalkot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                 {/* FIX: shadow-sm dihapus */}
+                 <div className={`rounded-lg p-2 text-center border ${dalkot2 > dalkot1 ? 'bg-green-50 border-green-200' : dalkot2 < dalkot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                     <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${dalkot2 > dalkot1 ? 'text-green-700' : dalkot2 < dalkot1 ? 'text-red-700' : 'text-gray-500'}`}>Dalkot</p>
                     <p className={`text-sm font-black ${dalkot2 > dalkot1 ? 'text-green-700' : dalkot2 < dalkot1 ? 'text-red-700' : 'text-gray-900'}`}>{dalkot2} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
-                 <div className={`rounded-lg p-2 text-center border shadow-sm ${lukot2 > lukot1 ? 'bg-green-50 border-green-200' : lukot2 < lukot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                 {/* FIX: shadow-sm dihapus */}
+                 <div className={`rounded-lg p-2 text-center border ${lukot2 > lukot1 ? 'bg-green-50 border-green-200' : lukot2 < lukot1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                     <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${lukot2 > lukot1 ? 'text-green-700' : lukot2 < lukot1 ? 'text-red-700' : 'text-gray-500'}`}>Luar Kota</p>
                     <p className={`text-sm font-black ${lukot2 > lukot1 ? 'text-green-700' : lukot2 < lukot1 ? 'text-red-700' : 'text-gray-900'}`}>{lukot2} <span className="text-[9px] font-normal opacity-70">km/l</span></p>
                  </div>
@@ -329,7 +334,6 @@ export default function CompareResult({
 
           </div>
 
-          {/* WATERMARK BAWAH RATA TENGAH */}
           <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
