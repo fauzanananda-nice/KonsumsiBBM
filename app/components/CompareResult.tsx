@@ -17,6 +17,25 @@ const spbuMap = [
 ];
 const ronMap = [{ id: 1, val: 90 }, { id: 2, val: 92 }, { id: 3, val: 95 }, { id: 4, val: 98 }];
 
+// Mesin Pengubah Gambar ke Teks (Base64)
+const getBase64FromUrl = async (url: string) => {
+  if (!url) return '';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return '';
+    const blob = await res.blob();
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.error("Gagal convert base64:", url);
+    return "";
+  }
+};
+
 const BrandLogo = ({ make, className }: { make: string, className?: string }) => {
   const [hasError, setHasError] = useState(false);
   const safeMake = make ? make.toLowerCase().replace(/\s+/g, '-') : '';
@@ -40,6 +59,9 @@ export default function CompareResult({
 }: any) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  
+  // State nampung banyak gambar Base64
+  const [base64Images, setBase64Images] = useState<any>(null);
 
   const getHargaUserBensin = (spbu_id: number, ron_id: number) => {
     const bensin = katalogHarga.find((b: any) => b.spbu_id === spbu_id && b.ron_id === ron_id);
@@ -50,15 +72,24 @@ export default function CompareResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      const el = captureRef.current;
+      // 1. Tarik semua link gambar
+      const safeMake1 = selectedCarData1.Make ? selectedCarData1.Make.toLowerCase().replace(/\s+/g, '-') : '';
+      const safeMake2 = selectedCarData2.Make ? selectedCarData2.Make.toLowerCase().replace(/\s+/g, '-') : '';
       
-      // JURUS ANTI-IOS: WARM UP RENDER
-      await toBlob(el, { cacheBust: true, pixelRatio: 1 }); 
-      await new Promise(resolve => setTimeout(resolve, 300)); 
-      await toBlob(el, { cacheBust: true, pixelRatio: 1 });
+      // 2. Convert massal
+      const b64Brand1 = await getBase64FromUrl(`/logos/${safeMake1}.png`);
+      const b64Brand2 = await getBase64FromUrl(`/logos/${safeMake2}.png`);
+      const b64Spbu1 = await getBase64FromUrl(spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src || '');
+      const b64Spbu2 = await getBase64FromUrl(spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src || '');
+      const b64Main = await getBase64FromUrl(mainLogo.src);
+
+      // 3. Simpan dan tunggu render React (Jurus Kawan Ente)
+      setBase64Images({ brand1: b64Brand1, brand2: b64Brand2, spbu1: b64Spbu1, spbu2: b64Spbu2, main: b64Main });
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // THE REAL CAPTURE 
+      const el = captureRef.current;
+      
+      // 4. Capture Final
       const blob = await toBlob(el, { 
         cacheBust: true,
         pixelRatio: 2,
@@ -92,7 +123,7 @@ export default function CompareResult({
     }
   };
 
-  // Helper Variables for Winners (Irit/Boros)
+  // Helper Variables
   const dalkot1 = parseFloat(selectedCarData1['City Fuel Consumption (km/l)']);
   const dalkot2 = parseFloat(selectedCarData2['City Fuel Consumption (km/l)']);
   const lukot1 = parseFloat(selectedCarData1['Highway Fuel Consumption (km/l)']);
@@ -104,7 +135,7 @@ export default function CompareResult({
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA */}
+      {/* UI UTAMA (TETAP SAMA) */}
       <div className="bg-white pb-4 pt-2">
         <div className="grid grid-cols-2 gap-2 mb-4 text-center">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
@@ -258,9 +289,13 @@ export default function CompareResult({
             
             {/* Mobil 1 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO */}
+               {/* FADING LOGO (Pake Base64 State) */}
                <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
-                  <BrandLogo make={selectedCarData1.Make} />
+                  {base64Images?.brand1 ? (
+                    <img src={base64Images.brand1} className="w-full h-full object-contain" />
+                  ) : (
+                    <BrandLogo make={selectedCarData1.Make} />
+                  )}
                </div>
 
                <div className="relative z-10 flex flex-col gap-1">
@@ -283,8 +318,13 @@ export default function CompareResult({
 
                <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5 mt-1">
                  <div>
+                   {/* SPBU LOGO M1 (Base64) */}
                    <div className="flex items-center gap-1.5 mb-1">
-                     <img src={spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                     <img 
+                       src={base64Images?.spbu1 || spbuMap.find(s => s.id === userBensin1.spbu)?.logo.src} 
+                       crossOrigin={base64Images?.spbu1 ? undefined : "anonymous"} 
+                       className="h-4 object-contain" 
+                     />
                      <span className="text-xs font-black text-gray-700">RON {ronMap.find(r => r.id === userBensin1.ron)?.val}</span>
                    </div>
                    <p className="text-[9px] text-gray-500 font-bold">Rp {getHargaUserBensin(userBensin1.spbu, userBensin1.ron).toLocaleString('id-ID')}/L</p>
@@ -302,9 +342,13 @@ export default function CompareResult({
 
             {/* Mobil 2 */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden">
-               {/* FADING LOGO */}
+               {/* FADING LOGO (Pake Base64 State) */}
                <div className="absolute -right-4 -top-4 opacity-[0.15] w-28 h-28 pointer-events-none">
-                  <BrandLogo make={selectedCarData2.Make} />
+                  {base64Images?.brand2 ? (
+                    <img src={base64Images.brand2} className="w-full h-full object-contain" />
+                  ) : (
+                    <BrandLogo make={selectedCarData2.Make} />
+                  )}
                </div>
 
                <div className="relative z-10 flex flex-col gap-1">
@@ -327,8 +371,13 @@ export default function CompareResult({
 
                <div className="relative z-10 flex items-end justify-between border-t border-gray-200 pt-2.5 mt-1">
                  <div>
+                   {/* SPBU LOGO M2 (Base64) */}
                    <div className="flex items-center gap-1.5 mb-1">
-                     <img src={spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src} crossOrigin="anonymous" className="h-4 object-contain" />
+                     <img 
+                       src={base64Images?.spbu2 || spbuMap.find(s => s.id === userBensin2.spbu)?.logo.src} 
+                       crossOrigin={base64Images?.spbu2 ? undefined : "anonymous"} 
+                       className="h-4 object-contain" 
+                     />
                      <span className="text-xs font-black text-gray-700">RON {ronMap.find(r => r.id === userBensin2.ron)?.val}</span>
                    </div>
                    <p className="text-[9px] text-gray-500 font-bold">Rp {getHargaUserBensin(userBensin2.spbu, userBensin2.ron).toLocaleString('id-ID')}/L</p>
@@ -342,11 +391,15 @@ export default function CompareResult({
 
           </div>
 
-          {/* WATERMARK BAWAH RATA TENGAH */}
+          {/* WATERMARK BAWAH RATA TENGAH (Base64 Main Logo) */}
           <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
-              <img src={mainLogo.src} crossOrigin="anonymous" className="h-7" />
+              <img 
+                src={base64Images?.main || mainLogo.src} 
+                crossOrigin={base64Images?.main ? undefined : "anonymous"} 
+                className="h-7" 
+              />
             </div>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">exum-bbm.site</span>
           </div>

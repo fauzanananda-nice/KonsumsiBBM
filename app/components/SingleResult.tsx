@@ -17,6 +17,25 @@ const spbuMap = [
 ];
 const ronMap = [{ id: 1, val: 90 }, { id: 2, val: 92 }, { id: 3, val: 95 }, { id: 4, val: 98 }];
 
+// Helper: Mesin Pengubah Gambar ke Teks (Base64) buat ngibulin Safari
+const getBase64FromUrl = async (url: string) => {
+  if (!url) return '';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return '';
+    const blob = await res.blob();
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.error("Gagal convert base64:", url);
+    return "";
+  }
+};
+
 const BrandLogo = ({ make, className }: { make: string, className?: string }) => {
   const [hasError, setHasError] = useState(false);
   const safeMake = make ? make.toLowerCase().replace(/\s+/g, '-') : '';
@@ -40,6 +59,9 @@ export default function SingleResult({
 }: any) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  
+  // State khusus buat nampung gambar Base64 sebelum ngefoto
+  const [base64Images, setBase64Images] = useState<any>(null);
 
   const getHargaUserBensin = (spbu_id: number, ron_id: number) => {
     const bensin = katalogHarga.find((b: any) => b.spbu_id === spbu_id && b.ron_id === ron_id);
@@ -50,19 +72,31 @@ export default function SingleResult({
     if (!captureRef.current) return;
     setIsSharing(true);
     try {
-      const el = captureRef.current;
+      // 1. Ambil semua link gambar yang butuh di-convert
+      const safeMake = selectedCarData.Make ? selectedCarData.Make.toLowerCase().replace(/\s+/g, '-') : '';
+      const brandUrl = `/logos/${safeMake}.png`;
+      const spbuUrl = spbuMap.find(s => s.id === userBensin.spbu)?.logo.src || '';
       
-      // JURUS ANTI-IOS: WARM UP RENDER
-      await toBlob(el, { cacheBust: true, pixelRatio: 1 }); 
-      await new Promise(resolve => setTimeout(resolve, 300)); 
-      await toBlob(el, { cacheBust: true, pixelRatio: 1 });
+      // 2. Convert barengan jadi Base64 (Jurus Kawan Ente)
+      const b64Brand = await getBase64FromUrl(brandUrl);
+      const b64Spbu = await getBase64FromUrl(spbuUrl);
+      const b64Main = await getBase64FromUrl(mainLogo.src);
+
+      // 3. Suntik ke State biar div screenshot me-render ulang pake Base64
+      setBase64Images({ brand: b64Brand, spbu: b64Spbu, main: b64Main });
+      
+      // Kasih nafas dikit biar React kelar nge-render state baru
       await new Promise(resolve => setTimeout(resolve, 300));
 
+      const el = captureRef.current;
+      
+      // 4. THE REAL CAPTURE (Sekarang Safari gabisa ngeblok)
       const blob = await toBlob(el, { 
         cacheBust: true, 
         pixelRatio: 2,
         backgroundColor: '#f3f4f6', 
       });
+
       if (!blob) throw new Error('Gagal bikin gambar');
 
       const file = new File([blob], 'exum-tracker-single.png', { type: 'image/png' });
@@ -93,7 +127,7 @@ export default function SingleResult({
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4">
       
-      {/* UI UTAMA */}
+      {/* UI UTAMA (TETAP SAMA, GAK DISENTUH SCREENSHOT) */}
       <div className="bg-white pb-4">
         <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm p-1.5 shrink-0">
@@ -190,12 +224,16 @@ export default function SingleResult({
 
           <div className="bg-white w-full rounded-3xl border border-gray-200 p-6 flex flex-col gap-6 relative z-10 overflow-hidden shadow-sm">
             
-            {/* BACKGROUND FADING LOGO */}
+            {/* BACKGROUND FADING LOGO - Pakai Base64 kalo udah siap */}
             <div className="absolute -right-8 -top-8 opacity-[0.15] w-64 h-64 pointer-events-none">
-               <BrandLogo make={selectedCarData.Make} />
+               {base64Images?.brand ? (
+                 <img src={base64Images.brand} className="w-full h-full object-contain" />
+               ) : (
+                 <BrandLogo make={selectedCarData.Make} />
+               )}
             </div>
 
-            {/* HEADER MOBIL YANG DI-MAXIMIZE */}
+            {/* HEADER MOBIL */}
             <div className="relative z-10">
                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">{selectedCarData.Make} {selectedCarData.Year}</p>
                <p className="text-3xl font-black text-gray-900 leading-tight pr-6">{selectedCarData.Type}</p>
@@ -218,9 +256,13 @@ export default function SingleResult({
             <div className="bg-green-50 rounded-2xl p-5 border border-green-200 text-center relative z-10">
                <p className="text-[10px] font-bold text-green-700 uppercase mb-2 tracking-widest">Estimasi Biaya ({dailyDistance}km/hari)</p>
                
-               {/* TAMPILAN BENSIN & HARGA */}
+               {/* TAMPILAN BENSIN & HARGA (Base64 SPBU Logo) */}
                <div className="flex items-center justify-center gap-2 mb-1">
-                  <img src={spbuMap.find(s => s.id === userBensin.spbu)?.logo.src} crossOrigin="anonymous" className="h-5 object-contain" />
+                  <img 
+                    src={base64Images?.spbu || spbuMap.find(s => s.id === userBensin.spbu)?.logo.src} 
+                    crossOrigin={base64Images?.spbu ? undefined : "anonymous"} 
+                    className="h-5 object-contain" 
+                  />
                   <span className="text-sm font-black text-green-800">RON {ronMap.find(r => r.id === userBensin.ron)?.val}</span>
                </div>
                <p className="text-[10px] font-medium text-green-700 mb-2">Rp {getHargaUserBensin(userBensin.spbu, userBensin.ron).toLocaleString('id-ID')}/L</p>
@@ -233,11 +275,15 @@ export default function SingleResult({
 
           </div>
 
-          {/* WATERMARK BAWAH RATA TENGAH */}
+          {/* WATERMARK BAWAH RATA TENGAH (Base64 Main Logo) */}
           <div className="absolute bottom-6 flex flex-col items-center justify-center w-full gap-2 opacity-90 relative z-20 mt-10">
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs font-medium text-gray-500 tracking-wide">Hasil kalkulasi BBM di</span>
-              <img src={mainLogo.src} crossOrigin="anonymous" className="h-7" />
+              <img 
+                src={base64Images?.main || mainLogo.src} 
+                crossOrigin={base64Images?.main ? undefined : "anonymous"} 
+                className="h-7" 
+              />
             </div>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">exum-bbm.site</span>
           </div>
